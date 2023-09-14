@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet"href="/node_modules/bootstrap/dist/css/bootstrap.css">
+    <script>
+        function bodyload(){
+            fetch("https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?sol=1000&api_key=DEMO_KEY")
+            .then(function(response){
+                return response.json();
+            })
+            .then(function(data){
+                var lstCameras=document.getElementById("lstCameras");
+                for(var photo of data.photos)
+                {
+                var div=document.createElement("div");
+                div.className="card m-2 p-2";
+                div.style.width="200px";
+                div.innerHTML=`
+                    <img src=${photo.img_src} class="card-img-top" height="150">
+                        <div class="card-header">${photo.id}</div>
+                            <div class="card-body">
+                            <dl>
+                                <dt>Camera Name</dt>
+                                <dd>${photo.camera.full_name}</dd>
+                                <dt>Rover Name</dt>
+                                <dd>${photo.rover.name}</dd>
+                            </dl>
+                        </div>      
+                    `;
+                    document.querySelector("main").append(div);
+                    var option=document.createElement("option");
+                    option.text=photo.camera.full_name;
+                    option.value=photo.camera.name;
+                    lstCameras.appendChild(option);
+                }
+            })
+        }    
+        function CameraChange(){
+            document.querySelector("main").innerHTML="";
+            var cameraName=document.getElementById("lstCameras").value
+            fetch("https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?sol=1000&api_key=DEMO_KEY")
+            .then(function(response){
+                return response.json();
+            })
+            .then(function(data){
+                var result=data.photos.filter(function(photo){
+                return photo.camera.name==cameraName;
+            });
+            for(var photo of result)
+            {
+                var div=document.createElement("div");
+                div.className="card m-2 p-2";
+                div.style.width="200px";
+                div.innerHTML=`
+                    <img src=${photo.img_src} class="card-img-top" height="150">
+                        <div class="card-header">${photo.id}</div>
+                            <div class="card-body">
+                                <dl>
+                                    <dt>Camera Name</dt>
+                                    <dd>${photo.camera.full_name}</dd>
+                                    <dt>Rover Name</dt>
+                                    <dd>${photo.rover.name}</dd>
+                                </dl>
+                            </div>    
+                `;
+                document.querySelector("main").append(div);
+            }
+            })
+        }
+    </script>
+</head>
+<body class="container-fluid" onload="bodyload()">
+<section class="row">
+    <nav class="col-3">
+        <h3>Filter Photos</h3>
+        <select id="lstCameras" onchange="CameraChange()" class="form-select"></select>
+    </nav>
+    <main class="col-9 d-flex flex-wrap">
+    </main>
+</section>
+
+</body>
+</html>
